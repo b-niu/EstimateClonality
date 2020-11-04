@@ -75,12 +75,10 @@ clonality.estimation <- function(mutation.table.loc
                         ,'Hugo_Symbol'
                         ,'Variant_Classification')
   
-  if(length(req.mut.colnames[!which(req.mut.colnames%in%colnames(mutation.table))])!=0)
-  {
+  if(!all(req.mut.colnames %in% colnames(mutation.table))) {
     stop(paste('Mutation table not in correct format\nThe following columns are required:\n'
                ,PasteVector(req.mut.colnames, sep="\n"),sep=""))
   }
-  
   
   # load somatic copy numbers ####
   if( !file.exists(seg.mat.loc))
