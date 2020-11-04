@@ -9,6 +9,9 @@
 # the function returns a p.val for every sample
 # the function uses the limma weighted.median function
 
+# Genome Doubling function
+# According to the code of clonality.estimation(), "val" means "cn".
+
 genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim = 10000) {
   print(sample)
   require(limma)
@@ -22,7 +25,6 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
     "9.5", "10", "10.5", "11", "11.5", "12", "12.5", "13.5", "14.5", "15.5", "16", "16.5", "17",
     "17.5", "18", "18.5", "19", "19.5", "20", "20.5", "21.5", "22.5"
   )
-
 
   # Determine whether given chromosome names are not equal to expected
   # note: input from ASCAT or ABSOLUTE must be modified (chromosome arms must be listed)
