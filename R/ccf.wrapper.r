@@ -167,8 +167,14 @@ clonality.estimation <- function(mutation.table.loc,
 
   colnames(sub.mat.cn) <- c("Sample", "Chrom", "Start", "End", "Num.probes", "val")
 
-  GD.pval <- genome.doub.sig(sample = TCGA.barcode, seg.mat.minor = sub.mat.minor, seg.mat.copy = sub.mat.cn, number.of.sim = 10000)
-  GD.status <- fun.GD.status(GD.pval = GD.pval, ploidy.val = round(sub.mat.copy$Ploidy[1]))
+  GD.pval <- genome.doub.sig(
+    sample = TCGA.barcode, seg.mat.minor = sub.mat.minor,
+    seg.mat.copy = sub.mat.cn, number.of.sim = 10000
+  )
+  GD.status <- fun.GD.status(
+    GD.pval = GD.pval,
+    ploidy.val = round(sub.mat.copy$Ploidy[1])
+  )
 
 
   TCGA.purity <- as.character(unique(sub.mat.copy[, grep("Aberrant", colnames(sub.mat.copy))]))
