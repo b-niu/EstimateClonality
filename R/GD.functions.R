@@ -202,37 +202,49 @@ fun.GD.status <- function(GD.pval, ploidy.val) {
 ## get seg.mat.copy ###################
 ###########################################
 
+#' Get seg.mat.arm
+#'
+#' @param seg.mat.copy A segmented total copy number matrix (columns as c("Sample","Chrom","Start","End","Num.probes","val"))
+#'
+#' @return A seg.mat.copy.arm
+#' @export
+#' @description 
+#' @details 
+#' @examples
+#' 
 get.seg.mat.arm <- function(seg.mat.copy) {
   data(centromere)
-
+  # "seg.mat.copy.arm" is a vector.
   seg.mat.copy.arm <- c()
 
-  for (sample in unique(seg.mat.copy[, 1]))
-  {
+  for (sample in unique(seg.mat.copy[, 1])) {
+    # "sample" is a TSB
+    # "sub" is a subset data.frame (?) of "sample"
     sub <- seg.mat.copy[seg.mat.copy[, 1] == sample, ]
     sub <- subset(seg.mat.copy, seg.mat.copy[, 1] == sample)
     sub.seg <- c()
 
-    for (chr in as.character(unique(sub[, 2])))
-    {
+    for (chr in as.character(unique(sub[, 2]))) {
       # print(chr)
       chr.sub <- sub[sub[, 2] == chr, , drop = FALSE]
 
       # identify subset of segments that are on chr1 or chr1.5
+      # "chr1.5" means the q arm of chr1.
+      # "start" < centromere start:
       chr.p <- chr.sub[which(as.numeric(chr.sub[, 3]) < centromere[chr, 2]), , drop = FALSE]
       if (nrow(chr.p) != 0) {
+        # If "end" > centromere "start", split the row into two rows,
+        # by changing "end" into the "start" or "end" of centromere.
         chr.p[as.numeric(chr.p[, 4]) > centromere[chr, 2], 4] <- round(centromere[as.character(chr), 2])
+        # In centromere, V2 == V3, so useing "start" or "end" has no difference.
       }
-
-
 
       chr.q <- subset(chr.sub, as.numeric(chr.sub[, 4]) > centromere[chr, 2])
       if (nrow(chr.q) != 0) {
+        # Add 1 to the new "start" location.
         chr.q[as.numeric(chr.q[, 3]) < centromere[chr, 2], 3] <- as.numeric(centromere[as.character(chr), 2]) + c(1)
         chr.q[, 2] <- paste(chr.q[, 2], ".5", sep = "")
       }
-
-
 
       chr.seg <- rbind(chr.p, chr.q)
       sub.seg <- rbind(sub.seg, chr.seg)
@@ -241,22 +253,17 @@ get.seg.mat.arm <- function(seg.mat.copy) {
     seg.mat.copy.arm <- rbind(seg.mat.copy.arm, sub.seg)
   }
 
-
   chr.names <- c(
     "1", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9",
     "9.5", "10", "10.5", "11", "11.5", "12", "12.5", "13.5", "14.5", "15.5", "16", "16.5", "17",
     "17.5", "18", "18.5", "19", "19.5", "20", "20.5", "21.5", "22.5"
   )
-
-  unique(seg.mat.copy.arm[, 2]) %in% chr.names
-
-
+  # TODO Why no 21, 15, 22, 13, 14?
   seg.mat.copy.arm[seg.mat.copy.arm[, 2] == 21, 2] <- "21.5"
   seg.mat.copy.arm[seg.mat.copy.arm[, 2] == 15, 2] <- "15.5"
   seg.mat.copy.arm[seg.mat.copy.arm[, 2] == 22, 2] <- "22.5"
   seg.mat.copy.arm[seg.mat.copy.arm[, 2] == 13, 2] <- "13.5"
   seg.mat.copy.arm[seg.mat.copy.arm[, 2] == 14, 2] <- "14.5"
-
 
   if (length(unique(seg.mat.copy.arm[, 2])[which(!unique(seg.mat.copy.arm[, 2]) %in% chr.names)]) != 0) {
     stop("Cannot fit chromosome arms")
