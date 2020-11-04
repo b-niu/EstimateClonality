@@ -7,3 +7,4 @@ Maintainer: Nicholas McGranahan <nicholas.mcgranahan@cancer.org.uk>
 License: GPL-3
 Depends: gdata, limma, sequenza, boot, bootstrap
 Packaged: 2014-12-24 11:31:52 UTC; nicky
+RoxygenNote: 7.1.1

@@ -9,13 +9,28 @@
 # the function returns a p.val for every sample
 # the function uses the limma weighted.median function
 
-# Genome Doubling function
+# 
 # According to the code of clonality.estimation(), "val" means "cn".
 
+#' Genome Doubling function
+#'
+#' @param sample TCGA sample identifier
+#' @param seg.mat.minor segmented minor allele copy number matrix
+#' @param seg.mat.copy segmented total copy number matrix
+#' @param number.of.sim The number of simulations to assess genome doubling likelihood, defaults to 10,000
+#' @description 
+#' The following function estimates the probability that a genome doubling has
+#' occured at some point during the evolutionary history of a tumour.
+#' @details 
+#' According to the code of clonality.estimation(), "val" means "cn".
+#' @return
+#' @export
+#'
+#' @examples
+#' genome.doub.sig(sample, seg.mat.minor, seg.mat.copy, number.of.sim = 10000)
+#' 
 genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim = 10000) {
-  print(sample)
-  require(limma)
-
+  # Remove other samples:
   sub.minor <- subset(seg.mat.minor, seg.mat.minor[, 1] == sample)
   sub.major <- subset(seg.mat.copy, seg.mat.copy[, 1] == sample)
 
@@ -38,19 +53,28 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
 
   # Determine whether given chromosome names are not equal to expected
   # note: input from ASCAT or ABSOLUTE must be modified (chromosome arms must be listed)
-  if (!identical(unique(sub.minor[, 2]), chr.names)) {
-    print("expected chr.names:")
-    print(chr.names)
+  # 1. check minor chromosomes
+  check_chrom_res <- check_chromosomal_names(
+    input_chrom = sub.minor[, 2]
+    , target_chrom = chr.names
+  )
+  if (check_chrom_res == "missing") {
+    warning("Some chromosomes are missing in seg.mat.minor")
+  } else if (check_chrom_res != "identical") {
     stop(c(("seg.mat.minor chr.names!= expected chr.names")))
   }
-
-  if (!identical(unique(sub.major[, 2]), chr.names)) {
-    print("expected chr.names:")
-    print(chr.names)
+  # 2. check total chromosomes
+  check_chrom_res <- check_chromosomal_names(
+    input_chrom = sub.major[, 2]
+    , target_chrom = chr.names
+  )
+  if (check_chrom_res == "missing") {
+    warning("Some chromosomes are missing in seg.mat.copy")
+  } else if (check_chrom_res != "identical") {
     stop(c(("seg.mat.copy chr.names!= expected chr.names")))
   }
-
-  # sumarize minor allele copy numbers at chromosome arm.level
+  
+  # summarize minor allele copy numbers at chromosome arm.level
   chr.arm.ploidy.minor <- c()
 
   for (chr.arm in unique(sub.minor[, 2])) {
@@ -61,7 +85,7 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
     if (length(unique(sub.chr.minor[, 5])) == 1) {
       arm.ploidy <- unique(sub.chr.minor[, 5])
     } else if (length(unique(sub.chr.minor[, 5])) > 1) {
-      arm.ploidy <- weighted.median(sub.chr.minor[, 5], w = sub.chr.minor[, 3] - sub.chr.minor[, 2], na.rm = TRUE)
+      arm.ploidy <- limma::weighted.median(sub.chr.minor[, 5], w = sub.chr.minor[, 3] - sub.chr.minor[, 2], na.rm = TRUE)
     }
 
     chr.arm.ploidy.minor <- c(chr.arm.ploidy.minor, arm.ploidy)
@@ -70,7 +94,7 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
   names(chr.arm.ploidy.minor) <- unique(sub.minor[, 2])
 
   # summarize total copy number at chromosome arm level
-  # note: major alllele will be calculated by subtracting minor from total
+  # note: major allele will be calculated by subtracting minor from total
   chr.arm.ploidy.major <- c()
 
   for (chr.arm in unique(sub.major[, 2])) {
@@ -83,7 +107,7 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
     }
 
     else if (length(unique(sub.chr.major[, 5])) > 1) {
-      arm.ploidy <- weighted.median(sub.chr.major[, 5], w = sub.chr.major[, 3] - sub.chr.major[, 2], na.rm = T)
+      arm.ploidy <- limma::weighted.median(sub.chr.major[, 5], w = sub.chr.major[, 3] - sub.chr.major[, 2], na.rm = T)
     }
 
     chr.arm.ploidy.major <- c(chr.arm.ploidy.major, arm.ploidy)
@@ -203,19 +227,10 @@ fun.GD.status <- function(GD.pval, ploidy.val) {
 ## get seg.mat.copy ###################
 ###########################################
 
-#' Get seg.mat.arm
-#'
-#' @param seg.mat.copy A segmented total copy number matrix (columns as c("Sample","Chrom","Start","End","Num.probes","val"))
-#'
-#' @return A seg.mat.copy.arm
-#' @export
-#' @description 
-#' @details 
-#' @examples
-#' 
+
 get.seg.mat.arm <- function(seg.mat.copy) {
   data(centromere)
-  # "seg.mat.copy.arm" is a vector.
+  # "seg.mat.copy.arm" is a vector. But after rbind(), it returns to a data.frame.
   seg.mat.copy.arm <- c()
 
   for (sample in unique(seg.mat.copy[, 1])) {
