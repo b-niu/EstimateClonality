@@ -26,6 +26,16 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
     "17.5", "18", "18.5", "19", "19.5", "20", "20.5", "21.5", "22.5"
   )
 
+  # example:
+  #       1        2         3            4             5         6
+  #  Sample    Chrom     Start          End    Num.probes       val
+  # sample1        1     14930    249212400            NA         1
+  # sample1        2     41686    242192881            NA         1
+  # sample1        3    361508     46620600            NA         1
+  # sample1        3  46620900     52823700            NA         1
+  # sample1        3  52824924    197896700            NA         1
+  # sample1        4     53500    190905700            NA         1
+
   # Determine whether given chromosome names are not equal to expected
   # note: input from ASCAT or ABSOLUTE must be modified (chromosome arms must be listed)
   if (!identical(unique(sub.minor[, 2]), chr.names)) {
@@ -40,22 +50,18 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
     stop(c(("seg.mat.copy chr.names!= expected chr.names")))
   }
 
-
   # sumarize minor allele copy numbers at chromosome arm.level
   chr.arm.ploidy.minor <- c()
 
-  for (chr.arm in unique(sub.minor[, 2]))
-  {
+  for (chr.arm in unique(sub.minor[, 2])) {
     sub.chr.minor <- rbind(subset(sub.minor, sub.minor[, 2] == chr.arm)[, 2:6])
     sub.chr.minor <- apply(sub.chr.minor, 2, as.numeric)
     sub.chr.minor <- rbind(sub.chr.minor)
 
     if (length(unique(sub.chr.minor[, 5])) == 1) {
       arm.ploidy <- unique(sub.chr.minor[, 5])
-    }
-
-    else if (length(unique(sub.chr.minor[, 5])) > 1) {
-      arm.ploidy <- weighted.median(sub.chr.minor[, 5], w = sub.chr.minor[, 3] - sub.chr.minor[, 2], na.rm = T)
+    } else if (length(unique(sub.chr.minor[, 5])) > 1) {
+      arm.ploidy <- weighted.median(sub.chr.minor[, 5], w = sub.chr.minor[, 3] - sub.chr.minor[, 2], na.rm = TRUE)
     }
 
     chr.arm.ploidy.minor <- c(chr.arm.ploidy.minor, arm.ploidy)
@@ -67,8 +73,7 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
   # note: major alllele will be calculated by subtracting minor from total
   chr.arm.ploidy.major <- c()
 
-  for (chr.arm in unique(sub.major[, 2]))
-  {
+  for (chr.arm in unique(sub.major[, 2])) {
     sub.chr.major <- rbind(subset(sub.major, sub.major[, 2] == chr.arm)[, 2:6])
     sub.chr.major <- apply(sub.chr.major, 2, as.numeric)
     sub.chr.major <- rbind(sub.chr.major)
@@ -98,18 +103,15 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
     p.val.genome.doubl <- c(1)
   }
 
-
   if (sum(total.aber) != 0) {
     # calculate the probability loss and gain for every arm
-    for (chr.arm in chr.names)
-    {
+    for (chr.arm in chr.names) {
       chr.prob.A <- (chr.arm.ploidy.major[chr.arm] - 1)
       chr.prob.A <- c(
         sum(chr.prob.A[chr.prob.A > 0]) / total.aber,
         abs(sum(chr.prob.A[chr.prob.A < 0]) / total.aber)
       )
       names(chr.prob.A) <- c(paste(chr.arm, "_Again", sep = ""), paste(chr.arm, "_Aloss", sep = ""))
-
 
       chr.prob.B <- (chr.arm.ploidy.minor[chr.arm] - 1)
       chr.prob.B <- c(sum(chr.prob.B[chr.prob.B > 0]) / total.aber, abs(sum(chr.prob.B[chr.prob.B < 0]) / total.aber))
@@ -119,7 +121,6 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
 
       chr.probs <- c(chr.probs, chr.prob)
     }
-
 
     prop.major.even.obs <- length(which(chr.arm.ploidy.major >= 2)) / length(chr.arm.ploidy.major)
     # should probably set something as prop.major.even.obs p.val =0.001
@@ -160,8 +161,6 @@ genome.doub.sig <- function(sample, seg.mat.minor, seg.mat.copy, number.of.sim =
       p.val.genome.doubl <- 0
     }
   }
-
-
 
   # return single p.val
   return(p.val.genome.doubl)
