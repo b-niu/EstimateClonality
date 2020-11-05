@@ -297,28 +297,29 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
 
 
     # Let's put this all together and output it
-    output <- data.frame(obs.VAF,
-      mut.conf.0.05,
-      mut.conf.0.95,
-      mut.multi,
-      mut.multi.0.05,
-      mut.multi.bstr.0.05,
-      mut.multi.0.95,
-      mut.multi.bstr.0.95,
-      Exp.Cpn = Max.Likelihood$Mt,
-      Exp.Cpn.Likelihood = Max.Likelihood$l,
-      ccf,
-      ccf.0.05,
-      ccf.btstr.0.05,
-      ccf.0.95,
-      ccf.btstr.0.95,
-      absolute.ccf,
-      absolute.ccf.0.05,
-      absolute.ccf.0.95,
-      prob.subclonal,
-      prob.clonal,
-      timing,
-      stringsAsFactors = FALSE
+    output <- data.frame(
+      unlist(obs.VAF),
+      unlist(mut.conf.0.05),
+      unlist(mut.conf.0.95),
+      unlist(mut.multi),
+      unlist(mut.multi.0.05),
+      unlist(mut.multi.bstr.0.05),
+      unlist(mut.multi.0.95),
+      unlist(mut.multi.bstr.0.95),
+      unlist(Exp.Cpn = Max.Likelihood$Mt),
+      unlist(Exp.Cpn.Likelihood = Max.Likelihood$l),
+      unlist(ccf),
+      unlist(ccf.0.05),
+      unlist(ccf.btstr.0.05),
+      unlist(ccf.0.95),
+      unlist(ccf.btstr.0.95),
+      unlist(absolute.ccf),
+      unlist(absolute.ccf.0.05),
+      unlist(absolute.ccf.0.95),
+      unlist(prob.subclonal),
+      unlist(prob.clonal),
+      unlist(timing),
+      unlist(stringsAsFactors = FALS)E
     )
 
     # output           <- data.frame(output,stringsAsFactors=FALSE)
