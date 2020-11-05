@@ -17,7 +17,7 @@ earlyORlate(patient, complete.mutation.table, purity)
 A data.frame.
 }
 \description{
-Clonal and temporal dissection
+This function implementents the cancer cell fraction analysis, as well as temporal dissection of mutations
 }
 \examples{
 
