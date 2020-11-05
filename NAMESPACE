@@ -3,5 +3,5 @@
 export(check_chromosomal_names)
 export(earlyORlate)
 export(genome.doub.sig)
-import("bootstrap,")
 import(boot)
+import(bootstrap)

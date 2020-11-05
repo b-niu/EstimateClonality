@@ -6,11 +6,12 @@
 #'
 #' @return A data.frame.
 #' @export
-#' @description 
+#' @description
 #' This function implementents the cancer cell fraction analysis, as well as temporal dissection of mutations
 #' @examples
 #'
-#' @import bootstrap, boot
+#' @import bootstrap
+#' @import boot
 #'
 
 earlyORlate <- function(patient, complete.mutation.table, purity) {
