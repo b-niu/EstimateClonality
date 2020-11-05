@@ -218,6 +218,11 @@ fun.GD.status <- function(GD.pval, ploidy.val) {
     GD.status <- ifelse(GD.pval <= 1, "GD", "nGD")
   }
 
+  # Handle larger values of ploidy
+  if (ploidy.val > 6) {
+    GD.status <- ifelse(GD.pval <= 1, "GD", "nGD")
+  }
+
   return(GD.status)
 }
 
