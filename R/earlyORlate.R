@@ -179,6 +179,32 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
   # add an absolute estimate of the cancer cell fraction
 
   get.all.mut.info <- function(i) {
+    # debug:
+    # The output returned may contain complex row.names and colnames,
+    # which makes the combined data.frame is not aligned.
+    FIXED_COLNAMES <- c(
+      "obs.VAF",
+      "mut.conf.0.05",
+      "mut.conf.0.95",
+      "mut.multi",
+      "mut.multi.0.05",
+      "mut.multi.bstr.0.05",
+      "mut.multi.0.95",
+      "mut.multi.bstr.0.95",
+      "Exp.Cpn",
+      "Exp.Cpn.Likelihood",
+      "ccf",
+      "ccf.0.05",
+      "ccf.btstr.0.05",
+      "ccf.0.95",
+      "ccf.btstr.0.95",
+      "absolute.ccf",
+      "absolute.ccf.0.05",
+      "absolute.ccf.0.95",
+      "prob.subclonal",
+      "prob.clonal",
+      "timing"
+    )
     # print(i)
     # First estimate the VAF confidence intervals
     obs.VAF <- VAF[i]
@@ -186,9 +212,10 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
     mut.conf.0.95 <- get.conf(F = VAF[i], depth.t = depth.t[i])[2]
 
     if (abs.cn[i] == 0) {
-      output <- data.frame(obs.VAF,
-        mut.conf.0.05,
-        mut.conf.0.95,
+      output <- data.frame(
+        unlist(obs.VAF),
+        unlist(mut.conf.0.05),
+        unlist(mut.conf.0.95),
         mut.multi = NA,
         mut.multi.0.05 = NA,
         mut.multi.bstr.0.05 = NA,
@@ -206,8 +233,10 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
         absoltue.ccf.0.95 = NA,
         prob.subclonal = NA,
         prob.clonal = NA,
-        timing = "Not.Poss"
+        timing = "Not.Poss",
+        row.names = NULL
       )
+      colnames(output) <- FIXED_COLNAMES
       return(output)
     }
 
@@ -229,13 +258,13 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
 
     if (is.na(L$l)[1]) {
       output <- data.frame(obs.VAF,
-        mut.conf.0.05,
-        mut.conf.0.95,
-        mut.multi,
-        mut.multi.0.05,
-        mut.multi.bstr.0.05,
-        mut.multi.0.95,
-        mut.multi.bstr.0.95,
+        unlist(mut.conf.0.05),
+        unlist(mut.conf.0.95),
+        unlist(mut.multi),
+        unlist(mut.multi.0.05),
+        unlist(mut.multi.bstr.0.05),
+        unlist(mut.multi.0.95),
+        unlist(mut.multi.bstr.0.95),
         Exp.Cpn = NA,
         Exp.Cpn.Likelihood = NA,
         ccf = NA,
@@ -248,8 +277,10 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
         absoltue.ccf.0.95 = NA,
         prob.subclonal = NA,
         prob.clonal = NA,
-        timing = "Not.Poss"
+        timing = "Not.Poss",
+        row.names = NULL
       )
+      colnames(output) <- FIXED_COLNAMES
       return(output)
     }
 
@@ -306,8 +337,8 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
       unlist(mut.multi.bstr.0.05),
       unlist(mut.multi.0.95),
       unlist(mut.multi.bstr.0.95),
-      unlist(Exp.Cpn = Max.Likelihood$Mt),
-      unlist(Exp.Cpn.Likelihood = Max.Likelihood$l),
+      Exp.Cpn = unlist(Max.Likelihood$Mt),
+      Exp.Cpn.Likelihood = unlist(Max.Likelihood$l),
       unlist(ccf),
       unlist(ccf.0.05),
       unlist(ccf.btstr.0.05),
@@ -319,45 +350,21 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
       unlist(prob.subclonal),
       unlist(prob.clonal),
       unlist(timing),
-      unlist(stringsAsFactors = FALS)E
+      stringsAsFactors = FALSE,
+      row.names = NULL
     )
-
-    # output           <- data.frame(output,stringsAsFactors=FALSE)
+    colnames(output) <- FIXED_COLNAMES
     return(output)
   }
 
   # output <- t(sapply(1:nrow(mut.table), get.all.mut.info))
   # output <- data.frame(output, stringsAsFactors = FALSE)
+
   # get.all.mut.info() returns a data.frame
   # The code above will generate a data.frame of list, which is not best practice.
   output.list <- lapply(1:nrow(mut.table), get.all.mut.info)
   output <- dplyr::bind_rows(output.list)
   output <- as.data.frame(output)
-
-  colnames(output) <- c(
-    "obs.VAF",
-    "mut.conf.0.05",
-    "mut.conf.0.95",
-    "mut.multi",
-    "mut.multi.0.05",
-    "mut.multi.bstr.0.05",
-    "mut.multi.0.95",
-    "mut.multi.bstr.0.95",
-    "Exp.Cpn",
-    "Exp.Cpn.Likelihood",
-    "ccf",
-    "ccf.0.05",
-    "ccf.btstr.0.05",
-    "ccf.0.95",
-    "ccf.btstr.0.95",
-    "absolute.ccf",
-    "absolute.ccf.0.05",
-    "absolute.ccf.0.95",
-    "prob.subclonal",
-    "prob.clonal",
-    "timing"
-  )
-
 
   out <- cbind(mut.table, output)
   return(out)
