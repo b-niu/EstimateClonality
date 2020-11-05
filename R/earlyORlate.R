@@ -325,8 +325,13 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
     return(output)
   }
 
-  output <- t(sapply(1:nrow(mut.table), get.all.mut.info))
-  output <- data.frame(output, stringsAsFactors = FALSE)
+  # output <- t(sapply(1:nrow(mut.table), get.all.mut.info))
+  # output <- data.frame(output, stringsAsFactors = FALSE)
+  # get.all.mut.info() returns a data.frame
+  # The code above will generate a data.frame of list, which is not best practice.
+  output.list <- lapply(1:nrow(mut.table), get.all.mut.info)
+  output <- dplyr::bind_rows(output.list)
+  output <- as.data.frame(output)
 
   colnames(output) <- c(
     "obs.VAF",
