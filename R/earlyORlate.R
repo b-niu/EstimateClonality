@@ -57,10 +57,11 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
     )
     l <- l / sum(l)
     L <- data.frame(l = l, Mt = types$Mt[types$CNt == CNt & types$Mt <= Mt])
+    return(L)
   }
 
   get.conf <- function(F, depth.t) {
-    conf.int <- cbind(
+    conf.int <- data.frame(
       prop.test(round(F * depth.t, 0), depth.t)$conf[1],
       prop.test(round(F * depth.t, 0), depth.t)$conf[2]
     )
@@ -70,14 +71,14 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
   bootstrap.cf <- function(Vaf, cellularity, CNn, CNt, depth.t) {
     # print(i)
     if (Vaf == 1) {
-      conf.int <- cbind(
+      conf.int <- data.frame(
         prop.test(round(Vaf * depth.t, 0), depth.t)$conf[1],
         prop.test(round(Vaf * depth.t, 0), depth.t)$conf[2]
       )
 
       lower <- get.mut.mult(Vaf = conf.int[1], cellularity = cellularity, CNt = CNt, CNn = CNn)
       higher <- get.mut.mult(Vaf = conf.int[2], cellularity = cellularity, CNt = CNt, CNn = CNn)
-      conf.int <- cbind(lower, higher)
+      conf.int <- data.frame(lower, higher)
       return(conf.int)
     }
 
@@ -134,7 +135,8 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
       prob.subclonal <- sum(xnorm[1:90]) # 1-prop.test(n.alt,depth,p=f.function(1,purity,local.copy.number),alternative='less')$p.val
       prob.clonal <- sum(xnorm[91:100]) # 1-prop.test(n.alt,depth,p=f.function(1,purity,local.copy.number),alternative='greater')$p.val
 
-      data.frame(left = l.t, est = m, right = r.t, prob.subclonal = prob.subclonal, prob.clonal = prob.clonal)
+      res.df <- data.frame(left = l.t, est = m, right = r.t, prob.subclonal = prob.subclonal, prob.clonal = prob.clonal)
+      return(res.df)
     }
 
 
@@ -167,7 +169,8 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
       prob.subclonal <- sum(xnorm[1:90]) # 1-prop.test(n.alt,depth,p=f.function(1,purity,local.copy.number),alternative='less')$p.val
       prob.clonal <- sum(xnorm[91:100]) # 1-prop.test(n.alt,depth,p=f.function(1,purity,local.copy.number),alternative='greater')$p.val
 
-      data.frame(left = l.t, est = m, right = r.t, prob.subclonal = prob.subclonal, prob.clonal = prob.clonal)
+      res.df <- data.frame(left = l.t, est = m, right = r.t, prob.subclonal = prob.subclonal, prob.clonal = prob.clonal)
+      return(res.df)
     }
 
 
@@ -183,7 +186,7 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
     mut.conf.0.95 <- get.conf(F = VAF[i], depth.t = depth.t[i])[2]
 
     if (abs.cn[i] == 0) {
-      output <- cbind(obs.VAF,
+      output <- data.frame(obs.VAF,
         mut.conf.0.05,
         mut.conf.0.95,
         mut.multi = NA,
@@ -225,7 +228,7 @@ earlyORlate <- function(patient, complete.mutation.table, purity) {
     mut.multi.bstr.0.95 <- mut.multi.bstr[2]
 
     if (is.na(L$l)[1]) {
-      output <- cbind(obs.VAF,
+      output <- data.frame(obs.VAF,
         mut.conf.0.05,
         mut.conf.0.95,
         mut.multi,
