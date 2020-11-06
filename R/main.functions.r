@@ -777,6 +777,11 @@ plot.EarlyOrLate <- function(seg.mat.patient,
   plot.earlyORlateCol <- function(x, timed.muts, nontimed = FALSE) {
     # print(x)
     mut <- timed.muts[x, , drop = FALSE]
+    
+    # fix bug: some data of mut.multi.bstr.0.95 are NA, which will induce to error.
+    if (any(is.na(mut$mut.multi.bstr.0.95))) {
+      return(NULL)
+    }
 
     # determine cell multiplicity
     mut.multiplicity <- mut$mut.multi
