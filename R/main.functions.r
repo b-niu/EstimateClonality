@@ -895,20 +895,27 @@ fun.add.chrom <- function(seg, chrom.length) {
   # This function adds the length of chromosome 1,...,(i - 1) to chromsomes 2,...,22
   # seg: first three columns of the minimum conistent region matrix
   # chrom.length: output of fun.chrom.length(...)
+
+  # fix bug: Data type mismatch results in mismatched results.
+  seg <- as.data.frame(seg)
+  seg[, 1] <- as.numeric(seg[, 1])
   if (1 %in% seg[, 1]) {
     seg.tmp <- subset(seg, seg[, 1] == 1)
   } else {
-    seg.tmp <- matrix(NA, nr = 0, nc = ncol(seg))
+    warning("In fun.add.chrom(), seg has no chromosome 1.")
+    seg.tmp <- matrix(NA, nrow = 0, ncol = ncol(seg))
   }
-  for (i in 2:max(max(as.numeric(seg[, 1])), 3)) {
+  for (i in 2:max(max(seg[, 1]), 3)) {
     if (!(i %in% seg[, 1])) {
-      next()
+      warning(stringr::str_interp("In fun.add.chrom(), seg has no chromosome ${i}."))
+      next
     }
     sub.chrom <- subset(seg, seg[, 1] == i)
     sub.chrom[, 2] <- as.numeric(sub.chrom[, 2]) + sum(as.numeric(chrom.length[1:(i - 1)]))
     sub.chrom[, 3] <- as.numeric(sub.chrom[, 3]) + sum(as.numeric(chrom.length[1:(i - 1)]))
     seg.tmp <- rbind(seg.tmp, sub.chrom)
   }
+  assertthat::assert_that(nrow(seg.tmp) == nrow(seg))
   return(seg.tmp)
 }
 
